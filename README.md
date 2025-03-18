@@ -54,3 +54,7 @@ pip install -r requirements.txt
 ```bash
 FLASK_DEBUG=1 python flask.py
 ```
+
+## Resources
+1. python-sdk. https://github.com/modelcontextprotocol/python-sdk
+2. cline's prompt -- how to ask ai to select mcp server. https://github.com/cline/cline/blob/main/src/core/prompts/system.ts
