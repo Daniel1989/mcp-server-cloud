@@ -52,17 +52,25 @@ async def handle_sampling_message(
         stopReason="endTurn",
     )
 
-async def get_server_tools(server_file: str) -> List[Dict[str, Any]]:
+async def get_server_tools(server_file: str, is_js: bool = False) -> List[Dict[str, Any]]:
     """Get all tools from a specific server file"""
-    server_path = os.path.join("servers", server_file)
-    server_name = os.path.splitext(server_file)[0]  # Remove extension
-    
-    # Create server parameters for stdio connection
-    server_params = StdioServerParameters(
-        command="python",  # Executable
-        args=[server_path],  # Server script path
-        env=None,  # Optional environment variables
-    )
+    if is_js:
+        server_params = StdioServerParameters(
+            command="npx",  # Executable
+            args=['@playwright/mcp@latest'],  # Server script path
+            env=None,  # Optional environment variables
+        ) 
+        server_name = 'default-js-server'
+    else:
+        server_path = os.path.join("servers", server_file)
+        server_name = os.path.splitext(server_file)[0]  # Remove extension
+        
+        # Create server parameters for stdio connection
+        server_params = StdioServerParameters(
+            command="python",  # Executable
+            args=[server_path],  # Server script path
+            env=None,  # Optional environment variables
+        )
     
     try:
         async with stdio_client(server_params) as (read, write):
@@ -277,6 +285,9 @@ async def run():
     for server_file in server_files:
         server_tools = await get_server_tools(server_file)
         all_tools.extend(server_tools)
+
+    server_tools = await get_server_tools('', False)
+    all_tools.extend(server_tools)
     
     # List tools if requested
     if args.list_tools:

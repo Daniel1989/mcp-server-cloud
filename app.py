@@ -20,9 +20,12 @@ async def initialize_tools():
     if not server_files:
         raise Exception("No server files found in the 'servers' directory.")
     
-    for server_file in server_files:
-        server_tools = await get_server_tools(server_file)
-        all_tools.extend(server_tools)
+    # for server_file in server_files:
+    #     server_tools = await get_server_tools(server_file)
+    #     all_tools.extend(server_tools)
+
+    server_tools = await get_server_tools('', True)
+    all_tools.extend(server_tools)
 
 # Run async initialization
 asyncio.run(initialize_tools())

@@ -58,3 +58,5 @@ FLASK_DEBUG=1 python flask.py
 ## Resources
 1. python-sdk. https://github.com/modelcontextprotocol/python-sdk
 2. cline's prompt -- how to ask ai to select mcp server. https://github.com/cline/cline/blob/main/src/core/prompts/system.ts
+3. remote mcp server https://github.com/sidharthrajaram/mcp-sse
+4. https://actions.zapier.com/settings/mcp/
