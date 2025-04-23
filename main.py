@@ -7,10 +7,20 @@ import requests
 
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
+from openai import OpenAI
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    base_url=os.environ.get("BASE_URL")
+)
+
+model_name = "gemini-2.0-flash"
+
 
 # Storage for all available tools
 all_tools = []
@@ -48,7 +58,7 @@ async def handle_sampling_message(
             type="text",
             text="Hello, world! from model",
         ),
-        model="gpt-3.5-turbo",
+        model=model_name,
         stopReason="endTurn",
     )
 
@@ -192,45 +202,25 @@ Parameters:
     
     return "\n".join(formatted_tools)
 
-def ask_llm_for_tool_selection(query: str, tools: List[Dict[str, Any]], model: str = "gpt-4o-mini") -> str:
+def ask_llm_for_tool_selection(query: str, tools: List[Dict[str, Any]], model: str = model_name) -> str:
     """Ask the LLM to select an appropriate tool based on the user query"""
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is not set")
-    
     # Format tools description for the prompt
     tools_description = format_tools_for_llm(tools)
     system_prompt = LLM_SYSTEM_PROMPT.format(tools_description=tools_description)
-    # Prepare the API request
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
     
-    data = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": query}
-        ],
-        "temperature": 0.3
-    }
     
     # Make the API request
-    response = requests.post(
-        "https://api.openai.com/v1/chat/completions",
-        headers=headers,
-        json=data
+    response = client.chat.completions.create(
+        model=model,
+        temperature=0.3,
+        messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": query}
+            ]
     )
-    
-    if response.status_code != 200:
-        print(f"Error from OpenAI API: {response.text}")
-        return f"Error getting a response from the AI: {response.status_code}"
-    
-    # Extract the response content
-    response_data = response.json()
-    message_content = response_data["choices"][0]["message"]["content"]
-    
+
+    message_content = response.choices[0].message.content
+    print(message_content)
     return message_content
 
 async def handle_user_query(query: str, tools: List[Dict[str, Any]] = []) -> Dict[str, Any]:
